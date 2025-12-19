@@ -105,4 +105,31 @@ describe("TokenMaster", () => {
             expect(contractBalance).to.equal(AMOUNT)
         })
     })
+
+    describe("Withdrawing", () => {
+        const ID = 1
+        const SEAT = 50
+        const AMOUNT = ethers.utils.parseEther("1")
+        let balanceBefore
+
+        beforeEach(async () => {
+            balanceBefore = await ethers.provider.getBalance(deployer.address)
+
+            const buyTransaction = await tokenMaster.connect(buyer).buyTicket(ID, SEAT, { value: AMOUNT })
+            await buyTransaction.wait()
+
+            const withdrawTransaction = await tokenMaster.connect(deployer).withdraw()
+            await withdrawTransaction.wait()
+        })
+
+        it("Updates the owner balance", async () => {
+            const balanceAfter = await ethers.provider.getBalance(deployer.address)
+            expect(balanceAfter).to.be.above(balanceBefore)
+        })
+
+        it("Updates the contract balance", async () => {
+            const contractBalance = await ethers.provider.getBalance(tokenMaster.address)
+            expect(contractBalance).to.equal(0)
+        })
+    })
 })
