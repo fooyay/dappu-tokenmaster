@@ -55,5 +55,17 @@ describe("TokenMaster", () => {
             expect(totalOccasions).to.equal(1)
         })
 
+        it("Returns occasion attributes", async () => {
+            const occasion = await tokenMaster.getOccasion(1)
+            expect(occasion.id).to.equal(1)
+            expect(occasion.name).to.equal(OCCASION_NAME)
+            expect(occasion.cost).to.equal(OCCASION_COST)
+            expect(occasion.tickets).to.equal(OCCASION_MAX_TICKETS)
+            expect(occasion.maxTickets).to.equal(OCCASION_MAX_TICKETS)
+            expect(occasion.date).to.equal(OCCASION_DATE)
+            expect(occasion.time).to.equal(OCCASION_TIME)
+            expect(occasion.location).to.equal(OCCASION_LOCATION)
+        })
+
     })
 })
