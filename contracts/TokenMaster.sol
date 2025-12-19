@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract TokenMaster is ERC721 {
     address public owner;
     uint256 public totalOccasions = 0;
+    uint256 public totalTickets = 0;
 
     struct Occasion {
         uint256 id;
@@ -19,6 +20,9 @@ contract TokenMaster is ERC721 {
     }
 
     mapping(uint256 => Occasion) occasions;
+    mapping(uint256 => mapping(address => bool)) public hasBought;
+    mapping(uint256 => mapping(uint256 => address)) public seatTaken;
+    mapping(uint256 => uint256[]) seatsTakenPerOccasion;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can perform this action");
@@ -51,7 +55,29 @@ contract TokenMaster is ERC721 {
         });
     }
 
+    function buyTicket(uint256 _id, uint256 _seatNumber) public payable {
+        require(totalOccasions > 0, "No occasions available");
+        require(_id > 0 && _id <= totalOccasions, "Invalid occasion ID");
+        require(occasions[_id].tickets > 0, "No tickets available for this occasion");
+        require(msg.value >= occasions[_id].cost, "Insufficient funds to buy ticket");
+        require(seatTaken[_id][_seatNumber] == address(0), "Seat already taken");
+        require(_seatNumber <= occasions[_id].maxTickets, "Invalid seat number");
+
+        occasions[_id].tickets--;
+        hasBought[_id][msg.sender] = true;
+        seatTaken[_id][_seatNumber] = msg.sender; // Assign seat to buyer
+        seatsTakenPerOccasion[_id].push(_seatNumber);
+
+        totalTickets++;
+
+        _safeMint(msg.sender, totalTickets);
+    }
+
     function getOccasion(uint256 _id) public view returns (Occasion memory) {
         return occasions[_id];
+    }
+
+    function getSeatsTaken(uint256 _id) public view returns (uint256[] memory) {
+        return seatsTakenPerOccasion[_id];
     }
 }

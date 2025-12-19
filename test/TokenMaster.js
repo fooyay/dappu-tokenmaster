@@ -68,4 +68,41 @@ describe("TokenMaster", () => {
         })
 
     })
+
+    describe("Purchasing", () => {
+        const ID = 1
+        const SEAT = 50
+        const AMOUNT = ethers.utils.parseEther("1")
+
+        beforeEach(async () => {
+            const transaction = await tokenMaster.connect(buyer).buyTicket(ID, SEAT, { value: AMOUNT })
+            await transaction.wait()
+        })
+
+        it("Updates the ticket count", async () => {
+            const occasion = await tokenMaster.getOccasion(ID)
+            expect(occasion.tickets).to.equal(OCCASION_MAX_TICKETS - 1)
+        })
+
+        it("Updates the buying status", async () => {
+            const status = await tokenMaster.hasBought(ID, buyer.address)
+            expect(status).to.equal(true)
+        })
+
+        it("Updates the seat owner", async () => {
+            const seatOwner = await tokenMaster.seatTaken(ID, SEAT)
+            expect(seatOwner).to.equal(buyer.address)
+        })
+
+        it("Updates overall seating status", async () => {
+            const seatsTaken = await tokenMaster.getSeatsTaken(ID)
+            expect(seatsTaken.length).to.equal(1)
+            expect(seatsTaken[0]).to.equal(SEAT)
+        })
+
+        it("Updates contract balance", async () => {
+            const contractBalance = await ethers.provider.getBalance(tokenMaster.address)
+            expect(contractBalance).to.equal(AMOUNT)
+        })
+    })
 })
