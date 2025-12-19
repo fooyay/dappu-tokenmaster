@@ -20,6 +20,11 @@ contract TokenMaster is ERC721 {
 
     mapping(uint256 => Occasion) occasions;
 
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can perform this action");
+        _;
+    }
+
     constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         owner = msg.sender;
     }
@@ -31,7 +36,7 @@ contract TokenMaster is ERC721 {
         string memory _date,
         string memory _time,
         string memory _location
-    ) public {
+    ) public onlyOwner {
         totalOccasions++;
 
         occasions[totalOccasions] = Occasion({
