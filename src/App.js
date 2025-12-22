@@ -15,9 +15,20 @@ import config from './config.json'
 import { use } from 'react'
 
 function App() {
+  const [provider, setProvider] = useState(null)
   const [account, setAccount] = useState(null)
 
   const loadBlchainData = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    setProvider(provider)
+    const network = await provider.getNetwork()
+    const tokenMaster = new ethers.Contract(
+      config[network.chainId].TokenMaster.address,
+      TokenMaster,
+      provider
+    )
+    console.log("tokenMaster", tokenMaster.address)
+
     // refresh account on change
     window.ethereum.on('accountsChanged', async () => {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
