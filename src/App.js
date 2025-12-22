@@ -12,8 +12,27 @@ import TokenMaster from './abis/TokenMaster.json'
 
 // Config
 import config from './config.json'
+import { use } from 'react'
 
 function App() {
+  const [account, setAccount] = useState(null)
+
+  const loadBlchainData = async () => {
+    // fetch account
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    setAccount(ethers.utils.getAddress(accounts[0]))
+
+    // refresh account on change
+    window.ethereum.on('accountsChanged', async () => {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      setAccount(ethers.utils.getAddress(accounts[0]))
+    })
+  }
+
+
+  useEffect(() => {
+    loadBlchainData()
+  }, [])
 
   return (
     <div>
