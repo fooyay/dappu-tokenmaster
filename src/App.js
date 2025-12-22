@@ -18,6 +18,11 @@ function App() {
   const [provider, setProvider] = useState(null)
   const [account, setAccount] = useState(null)
 
+  const [tokenMaster, setTokenMaster] = useState(null)
+  const [occasions, setOccasions] = useState([])
+  const [toggle, setToggle] = useState(false)
+  const [occasion, setOccasion] = useState({})
+
   const loadBlchainData = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     setProvider(provider)
@@ -27,6 +32,16 @@ function App() {
       TokenMaster,
       provider
     )
+    setTokenMaster(tokenMaster)
+
+    const totalOccasions = await tokenMaster.totalOccasions()
+    const occasions = []
+    for (let i = 1; i <= totalOccasions; i++) {
+      const occasion = await tokenMaster.getOccasion(i)
+      occasions.push(occasion)
+    }
+    setOccasions(occasions)
+
     console.log("tokenMaster", tokenMaster.address)
 
     // refresh account on change
@@ -47,6 +62,22 @@ function App() {
         <Navigation account={account} setAccount={setAccount} />
         <h2 className="header__title"><strong>Event</strong> Tickets</h2>
       </header>
+
+      <div className="cards">
+        {occasions.map((occasion, index) => (
+          <Card
+            occasion={occasion}
+            id={index+1}
+            tokenMaster={tokenMaster}
+            provider={provider}
+            account={account}
+            toggle={toggle}
+            setToggle={setToggle}
+            setOccasion={setOccasion}
+            key={index}
+          />
+        ))}
+      </div>
 
     </div>
   );
